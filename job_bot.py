@@ -144,7 +144,6 @@ def rank_job(job):
     return score
 
 
-jobs_list.sort(key=rank_job)
 
 
 def main():
