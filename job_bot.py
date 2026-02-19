@@ -128,6 +128,24 @@ def fetch_remotive():
     return jobs
 
 
+def rank_job(job):
+    location = job["location"].lower()
+    score = 0
+
+    if "bangalore" in location or "bengaluru" in location:
+        score -= 2
+    elif "remote" in location:
+        score -= 1
+
+    if job["type"] == "Target MNC":
+        score -= 3
+
+    return score
+
+
+jobs_list.sort(key=rank_job)
+
+
 def main():
     all_jobs = []
 
