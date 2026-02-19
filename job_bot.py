@@ -57,33 +57,39 @@ def detect_company_type(company):
 
 
 def fetch_indeed():
+   def fetch_indeed():
     jobs = []
     url = "https://in.indeed.com/jobs?q=java+developer+0-2+years&l=India"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        "User-Agent": "Mozilla/5.0"
     }
 
     response = requests.get(url, headers=headers)
-    print("HTML length:", len(response.text))
     soup = BeautifulSoup(response.text, "html.parser")
 
-    for card in soup.find_all("div", class_="job_seen_beacon"):
+    links = soup.find_all("a", href=True)
 
-        title_tag = card.find("h2")
-        company_tag = card.find("span", class_="companyName")
-        location_tag = card.find("div", class_="companyLocation")
+    for link in links:
+        href = link["href"]
 
-        if title_tag and company_tag and location_tag:
+        if "/rc/clk" in href:
 
-            title_text = title_tag.get_text(strip=True)
-            company_text = company_tag.get_text(strip=True)
-            location_text = location_tag.get_text(strip=True)
+            title_text = link.get_text(strip=True)
 
-            link_tag = title_tag.find("a")
-            if not link_tag:
+            if not title_text:
                 continue
 
-            job_link = "https://in.indeed.com" + link_tag.get("href")
+            parent = link.find_parent("div")
+            if not parent:
+                continue
+
+            company_tag = parent.find("span")
+            location_tag = parent.find("div")
+
+            company_text = company_tag.get_text(strip=True) if company_tag else "Unknown"
+            location_text = location_tag.get_text(strip=True) if location_tag else "Unknown"
+
+            job_link = "https://in.indeed.com" + href
 
             if is_relevant(title_text, company_text, location_text):
                 jobs.append({
@@ -98,6 +104,7 @@ def fetch_indeed():
 
         if len(jobs) >= MAX_JOBS * 2:
             break
+
     print("Indeed jobs collected:", len(jobs))
     return jobs
 
