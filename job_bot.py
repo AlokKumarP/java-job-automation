@@ -64,6 +64,7 @@ def fetch_indeed():
     }
 
     response = requests.get(url, headers=headers)
+    print("HTML length:", len(response.text))
     soup = BeautifulSoup(response.text, "html.parser")
 
     for card in soup.find_all("div", class_="job_seen_beacon"):
@@ -97,7 +98,7 @@ def fetch_indeed():
 
         if len(jobs) >= MAX_JOBS * 2:
             break
-
+    print("Indeed jobs collected:", len(jobs))
     return jobs
 
 
