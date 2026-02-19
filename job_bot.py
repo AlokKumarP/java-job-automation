@@ -5,6 +5,14 @@ import os
 
 SHEET_WEBHOOK_URL = os.getenv("SHEET_WEBHOOK_URL")
 
+def get_existing_links():
+    response = requests.get(SHEET_WEBHOOK_URL)
+    try:
+        return set(response.json())
+    except:
+        return set()
+
+
 LOCATION_KEYWORDS = ["bengaluru", "bangalore", "remote"]
 EXPERIENCE_KEYWORDS = ["0 year", "1 year", "2 year", "0-2", "1-2"]
 TARGET_COMPANIES = [
@@ -126,12 +134,22 @@ def main():
     for job in all_jobs:
         unique[job["link"]] = job
 
-    final_jobs = list(unique.values())[:MAX_JOBS]
+    jobs_list = list(unique.values())
+
+    # Sort: Target MNC first
+    jobs_list.sort(key=lambda x: 0 if x["type"] == "Target MNC" else 1)
+
+    final_jobs = jobs_list[:MAX_JOBS]
+
+
+    existing_links = get_existing_links()
 
     for job in final_jobs:
+    if job["link"] not in existing_links:
         send_to_sheet(job)
 
     print("Success")
+
 
 
 if __name__ == "__main__":
