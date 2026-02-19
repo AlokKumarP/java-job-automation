@@ -56,56 +56,52 @@ def detect_company_type(company):
     return "Other"
 
 
+import xml.etree.ElementTree as ET
+
 def fetch_indeed():
     jobs = []
-    url = "https://in.indeed.com/jobs?q=java+developer+0-2+years&l=India"
-    headers = {
-        "User-Agent": "Mozilla/5.0"
-    }
+    url = "https://in.indeed.com/rss?q=java+developer+0-2+years&l=India"
 
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text, "html.parser")
+    response = requests.get(url)
+    root = ET.fromstring(response.content)
 
-    links = soup.find_all("a", href=True)
+    for item in root.findall(".//item"):
 
-    for link in links:
-        href = link["href"]
+        title = item.find("title").text if item.find("title") is not None else ""
+        link = item.find("link").text if item.find("link") is not None else ""
+        description = item.find("description").text if item.find("description") is not None else ""
 
-        if "/rc/clk" in href:
+        if not title or not link:
+            continue
 
-            title_text = link.get_text(strip=True)
+        if "java" not in title.lower():
+            continue
 
-            if not title_text:
-                continue
+        # Basic location detection from description
+        location = "India"
+        if "bangalore" in description.lower() or "bengaluru" in description.lower():
+            location = "Bangalore"
+        elif "remote" in description.lower():
+            location = "Remote"
 
-            parent = link.find_parent("div")
-            if not parent:
-                continue
+        company = "Unknown"
 
-            company_tag = parent.find("span")
-            location_tag = parent.find("div")
-
-            company_text = company_tag.get_text(strip=True) if company_tag else "Unknown"
-            location_text = location_tag.get_text(strip=True) if location_tag else "Unknown"
-
-            job_link = "https://in.indeed.com" + href
-
-            if is_relevant(title_text, company_text, location_text):
-                jobs.append({
-                    "title": title_text,
-                    "company": company_text,
-                    "location": location_text,
-                    "experience": "0-2 years",
-                    "type": detect_company_type(company_text),
-                    "link": job_link,
-                    "source": "Indeed"
-                })
+        jobs.append({
+            "title": title,
+            "company": company,
+            "location": location,
+            "experience": "0-2 years",
+            "type": "Unknown",
+            "link": link,
+            "source": "Indeed RSS"
+        })
 
         if len(jobs) >= MAX_JOBS * 2:
             break
 
-    print("Indeed jobs collected:", len(jobs))
+    print("Indeed RSS jobs:", len(jobs))
     return jobs
+
 
 
 def fetch_remotive():
