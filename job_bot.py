@@ -145,8 +145,8 @@ def main():
     existing_links = get_existing_links()
 
     for job in final_jobs:
-    if job["link"] not in existing_links:
-        send_to_sheet(job)
+        if job["link"] not in existing_links:
+            send_to_sheet(job)
 
     print("Success")
 
