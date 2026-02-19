@@ -167,7 +167,7 @@ def main():
     jobs_list = list(unique.values())
 
     # Sort: Target MNC first
-    jobs_list.sort(key=lambda x: 0 if x["type"] == "Target MNC" else 1)
+    jobs_list.sort(key=rank_job)
 
     final_jobs = jobs_list[:MAX_JOBS]
 
