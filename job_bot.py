@@ -7,7 +7,7 @@ SHEET_WEBHOOK_URL = os.getenv("SHEET_WEBHOOK_URL")
 
 KEYWORDS = ["java"]
 LOCATION = "bangalore"
-MAX_JOBS = 5
+MAX_JOBS = 15
 
 def send_to_sheet(job):
     data = {
