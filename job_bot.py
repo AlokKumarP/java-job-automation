@@ -58,25 +58,33 @@ def detect_company_type(company):
 
 def fetch_indeed():
     jobs = []
-    url = "https://in.indeed.com/jobs?q=java+developer+0-2+years&l=Bengaluru"
-    headers = {"User-Agent": "Mozilla/5.0"}
+    url = "https://in.indeed.com/jobs?q=java+developer+0-2+years&l=India"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    }
 
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, "html.parser")
 
-    for card in soup.select("a.tapItem"):
-        title = card.select_one("h2 span")
-        company = card.select_one(".companyName")
-        location = card.select_one(".companyLocation")
+    for card in soup.find_all("div", class_="job_seen_beacon"):
 
-        if title and company and location:
-            title_text = title.text.strip()
-            company_text = company.text.strip()
-            location_text = location.text.strip()
+        title_tag = card.find("h2")
+        company_tag = card.find("span", class_="companyName")
+        location_tag = card.find("div", class_="companyLocation")
+
+        if title_tag and company_tag and location_tag:
+
+            title_text = title_tag.get_text(strip=True)
+            company_text = company_tag.get_text(strip=True)
+            location_text = location_tag.get_text(strip=True)
+
+            link_tag = title_tag.find("a")
+            if not link_tag:
+                continue
+
+            job_link = "https://in.indeed.com" + link_tag.get("href")
 
             if is_relevant(title_text, company_text, location_text):
-                job_link = "https://in.indeed.com" + card.get("href")
-
                 jobs.append({
                     "title": title_text,
                     "company": company_text,
@@ -87,7 +95,7 @@ def fetch_indeed():
                     "source": "Indeed"
                 })
 
-        if len(jobs) >= MAX_JOBS:
+        if len(jobs) >= MAX_JOBS * 2:
             break
 
     return jobs
