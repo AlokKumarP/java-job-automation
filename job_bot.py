@@ -57,7 +57,6 @@ def detect_company_type(company):
 
 
 def fetch_indeed():
-   def fetch_indeed():
     jobs = []
     url = "https://in.indeed.com/jobs?q=java+developer+0-2+years&l=India"
     headers = {
