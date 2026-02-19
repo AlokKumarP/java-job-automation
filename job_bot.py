@@ -126,6 +126,10 @@ def main():
     indeed_jobs = fetch_indeed()
     remotive_jobs = fetch_remotive()
 
+    print("Indeed jobs found:", len(indeed_jobs))
+    print("Remotive jobs found:", len(remotive_jobs))
+
+
     all_jobs.extend(indeed_jobs)
     all_jobs.extend(remotive_jobs)
 
